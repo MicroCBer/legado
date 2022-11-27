@@ -515,7 +515,6 @@ class ReadBookActivity : BaseReadBookActivity(),
 
         when (event.action) {
             MotionEvent.ACTION_DOWN ->{
-                checkTime();
                 textActionMenu.dismiss()
             }
             MotionEvent.ACTION_MOVE -> {
@@ -707,7 +706,6 @@ class ReadBookActivity : BaseReadBookActivity(),
     fun checkTime():Int{
         val now: LocalDateTime = LocalDateTime.now()
         val dTime=now.hour*60+now.minute;
-
         if(now.dayOfWeek==DayOfWeek.SATURDAY||now.dayOfWeek==DayOfWeek.SUNDAY)return 0;
             val bannedTimeList:Array<Pair<Int,Int>> =
                 arrayOf(Pair(7*60+50,40),
@@ -724,13 +722,13 @@ class ReadBookActivity : BaseReadBookActivity(),
                     Pair(0,250))
 
             // ignore friday afternoon
-            if(now.dayOfWeek==DayOfWeek.MONDAY && now.hour>12){
+            if(now.dayOfWeek==DayOfWeek.FRIDAY && now.hour>12){
                 return 0;
             }
 
 
             for((start,time) in bannedTimeList){
-                if(dTime>start&&dTime<(start+time)){
+                if(dTime>=start&&dTime<=(start+time)){
                     fun formatTime(time:Int):String{
                         return "${time.floorDiv(60)}:${(time%60).toString().padStart(2,'0')}"
                     }
