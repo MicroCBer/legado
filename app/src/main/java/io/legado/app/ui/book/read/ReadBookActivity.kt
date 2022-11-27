@@ -704,12 +704,11 @@ class ReadBookActivity : BaseReadBookActivity(),
         }
     }
 
-    fun checkTime(){
+    fun checkTime():Int{
         val now: LocalDateTime = LocalDateTime.now()
         val dTime=now.hour*60+now.minute;
 
-        if(now.dayOfWeek==DayOfWeek.SATURDAY||now.dayOfWeek==DayOfWeek.SUNDAY);
-        else{
+        if(now.dayOfWeek==DayOfWeek.SATURDAY||now.dayOfWeek==DayOfWeek.SUNDAY)return 0;
             val bannedTimeList:Array<Pair<Int,Int>> =
                 arrayOf(Pair(7*60+50,40),
                     Pair(8*60+40,40),
@@ -724,6 +723,12 @@ class ReadBookActivity : BaseReadBookActivity(),
                     Pair(23*60+20,250),
                     Pair(0,250))
 
+            // ignore friday afternoon
+            if(now.dayOfWeek==DayOfWeek.MONDAY && now.hour>12){
+                return 0;
+            }
+
+
             for((start,time) in bannedTimeList){
                 if(dTime>start&&dTime<(start+time)){
                     fun formatTime(time:Int):String{
@@ -735,7 +740,7 @@ class ReadBookActivity : BaseReadBookActivity(),
                     break
                 }
             }
-        }
+        return 0;
     }
 
     /**
