@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.*
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.get
@@ -65,6 +66,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.time.DayOfWeek
+import java.time.LocalDateTime
 
 class ReadBookActivity : BaseReadBookActivity(),
     View.OnTouchListener,
@@ -132,6 +135,7 @@ class ReadBookActivity : BaseReadBookActivity(),
     override val isInitFinish: Boolean get() = viewModel.isInitFinish
     override val isScroll: Boolean get() = binding.readView.isScroll
     private var keepScreenJon: Job? = null
+    private var noClassReadJon: Job? = null
     private var autoPageJob: Job? = null
     private var backupJob: Job? = null
     override var autoPageProgress = 0
@@ -162,6 +166,8 @@ class ReadBookActivity : BaseReadBookActivity(),
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
         viewModel.initData(intent)
+
+        checkTime();
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -506,8 +512,12 @@ class ReadBookActivity : BaseReadBookActivity(),
      */
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouch(v: View, event: MotionEvent): Boolean = binding.run {
+
         when (event.action) {
-            MotionEvent.ACTION_DOWN -> textActionMenu.dismiss()
+            MotionEvent.ACTION_DOWN ->{
+                checkTime();
+                textActionMenu.dismiss()
+            }
             MotionEvent.ACTION_MOVE -> {
                 when (v.id) {
                     R.id.cursor_left -> readView.curPage.selectStartMove(
@@ -694,10 +704,45 @@ class ReadBookActivity : BaseReadBookActivity(),
         }
     }
 
+    fun checkTime(){
+        val now: LocalDateTime = LocalDateTime.now()
+        val dTime=now.hour*60+now.minute;
+
+        if(now.dayOfWeek==DayOfWeek.SATURDAY||now.dayOfWeek==DayOfWeek.SUNDAY);
+        else{
+            val bannedTimeList:Array<Pair<Int,Int>> =
+                arrayOf(Pair(7*60+50,40),
+                    Pair(8*60+40,40),
+                    Pair(9*60+30,40),
+                    Pair(10*60+45,40),
+                    Pair(11*60+35,45),
+                    Pair(14*60+20,40),
+                    Pair(15*60+10,40),
+                    Pair(16*60+0,40),
+                    Pair(16*60+50,40),
+                    Pair(18*60+30,150),
+                    Pair(23*60+20,250),
+                    Pair(0,250))
+
+            for((start,time) in bannedTimeList){
+                if(dTime>start&&dTime<(start+time)){
+                    fun formatTime(time:Int):String{
+                        return "${time.floorDiv(60)}:${(time%60).toString().padStart(2,'0')}"
+                    }
+                    val toast = Toast.makeText(applicationContext, "呜哇\n现在是:${formatTime(dTime)}\n${formatTime(start)} ~ ${formatTime(start+time)}\n不准康~", Toast.LENGTH_LONG)
+                    toast.show()
+                    finish();
+                    break
+                }
+            }
+        }
+    }
+
     /**
      * 页面改变
      */
     override fun pageChanged() {
+        checkTime();
         launch {
             autoPageProgress = 0
             binding.readMenu.setSeekPage(ReadBook.durPageIndex)

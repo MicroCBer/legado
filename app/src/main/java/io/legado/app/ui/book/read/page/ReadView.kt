@@ -29,6 +29,8 @@ import io.legado.app.utils.screenshot
 import java.text.BreakIterator
 import java.util.*
 import kotlin.math.abs
+import cn.hutool.core.date.DateUtil.hour
+import java.time.LocalDateTime
 
 
 class ReadView(context: Context, attrs: AttributeSet) :
@@ -158,6 +160,10 @@ class ReadView(context: Context, attrs: AttributeSet) :
      */
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
+
+
+
+
         callBack.screenOffTimerStart()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val insets =
